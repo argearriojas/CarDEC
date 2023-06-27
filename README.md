@@ -49,17 +49,10 @@ A [tutorial jupyter notebook](https://drive.google.com/drive/folders/19VVOoq4XSd
 ## Software Requirements
     
 - Python >= 3.7
-- TensorFlow >= 2.0.1, <= 2.3.1
+- TensorFlow >= 2.0.1
 - scikit-learn == 0.22.2.post1
-- scanpy == 1.5.1
-- louvain == 0.6.1
-- pandas == 1.0.1
-- scipy == 1.4.1
+- scanpy >= 1.5.1
+- leidealgn >= 0.9.1
+- pandas >= 1.0.1
+- scipy >= 1.4.1
 
-## Trouble shooting
-
-Installation on MacOS should be smooth. If installing on Windows Subsystem for Linux (WSL), the user must properly configure their g++ compiler to ensure that the louvain package can be built during installation. If the compiler is not properly configured, the user may encounter a following deprecation error similar to the following.
-
-"DEPRECATION: Could not build wheels for louvain which do not use PEP 517. pip will fall back to legacy 'setup.py install' for these. pip 21.0 will remove support for this functionality. A possible replacement is to fix the wheel build issue reported above."
-
-To fix this error, try to install the libxml2-dev package.

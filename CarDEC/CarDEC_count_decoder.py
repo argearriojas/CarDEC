@@ -123,7 +123,7 @@ class count_model(Model):
         
         x = [tf.zeros(shape = (1, n_features), dtype='float32'), tf.ones(shape = (1,), dtype='float32')]
         out = self(*x)
-        
+
         if summarize:
             print("----------Count Model " + name + " Architecture----------")
             self.summary()
