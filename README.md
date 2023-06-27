@@ -22,26 +22,26 @@ Recomended installation procedure is as follows.
 2. Create a conda environment, and then activate it as follows in terminal.
 
 ```
-$ conda create -n cardecenv
-$ conda activate cardecenv
+conda create -n cardecenv
+conda activate cardecenv
 ```
 
 3. Install an appropriate version of python.
 
 ```
-$ conda install python=3.10
+conda install python=3.10
 ```
 
 4. Install nb_conda_kernels so that you can change python kernels in jupyter notebook.
 
 ```
-$ conda install nb_conda_kernels
+conda install nb_conda_kernels
 ```
 
 5. Finally, install CarDEC.
 
 ```
-$ pip install https://github.com/argearriojas/CarDEC.git
+pip install git+https://github.com/argearriojas/CarDEC.git
 ```
 
 Now, to use CarDEC, always make sure you activate the environment in terminal first ("conda activate cardecenv"). And then run jupyter notebook. When you create a notebook to run CarDEC, make sure the active kernel is switched to "cardecenv"
