@@ -12,6 +12,7 @@ import random
 import numpy as np
 from scipy.stats import zscore
 import os
+from pathlib import Path
 
 
 set_floatx('float32')
@@ -40,7 +41,7 @@ class SAE(Model):
         
         tf.keras.backend.clear_session()
         
-        self.weights_dir = weights_dir
+        self.weights_dir = Path(weights_dir)
         
         self.dims = dims
         self.n_stacks = len(dims) - 1
@@ -108,7 +109,7 @@ class SAE(Model):
         np.random.seed(random_seed)
         tf.random.set_seed(random_seed)
      
-        self.encoder.load_weights("./" + self.weights_dir + "/pretrained_encoder_weights").expect_partial()
+        self.encoder.load_weights(self.weights_dir.joinpath("pretrained_encoder_weights").as_posix()).expect_partial()
         
         decoder_layers = []
         for i in range(self.n_stacks - 1, 0, -1):
@@ -125,7 +126,7 @@ class SAE(Model):
         
         tf.keras.backend.clear_session()
         
-        self.load_weights("./" + self.weights_dir + "/pretrained_autoencoder_weights").expect_partial()
+        self.load_weights(self.weights_dir.joinpath("pretrained_autoencoder_weights").as_posix()).expect_partial()
         
     def construct(self, summarize = False):
         """ This class method fully initalizes the TensorFlow model.
@@ -293,11 +294,10 @@ class SAE(Model):
         
         total_time = round(time() - total_start, 2)
         
-        if not os.path.isdir("./" + self.weights_dir):
-            os.mkdir("./" + self.weights_dir)
+        self.weights_dir.mkdir(parents=True, exist_ok=True)
         
-        self.save_weights("./" + self.weights_dir + "/pretrained_autoencoder_weights", save_format='tf')
-        self.encoder.save_weights("./" + self.weights_dir + "/pretrained_encoder_weights", save_format='tf')
+        self.save_weights(self.weights_dir.joinpath("pretrained_autoencoder_weights").as_posix(), save_format='tf')
+        self.encoder.save_weights(self.weights_dir.joinpath("pretrained_encoder_weights").as_posix(), save_format='tf')
         
         print('\nTraining Completed')
         print("Total training time: " + str(total_time) + " seconds")

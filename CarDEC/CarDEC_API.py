@@ -8,6 +8,7 @@ import numpy as np
 from pandas import DataFrame
 
 import os
+from pathlib import Path
 
 class CarDEC_API:
     def __init__(self, adata, preprocess=True, weights_dir = "CarDEC Weights", batch_key = None, n_high_var = 2000, LVG = True,
@@ -32,7 +33,7 @@ class CarDEC_API:
             n_high_var = None
             LVG = False
 
-        self.weights_dir = weights_dir
+        self.weights_dir = Path(weights_dir)
         self.LVG = LVG
 
         self.norm_args = (batch_key, n_high_var, LVG, normalize_samples, log_normalize, normalize_features)
@@ -91,7 +92,7 @@ class CarDEC_API:
             self.LVG_dims = None
 
         self.load_fullmodel = load_fullmodel
-        self.weights_exist = os.path.isfile("./" + self.weights_dir + "/tuned_CarDECweights.index")
+        self.weights_exist = self.weights_dir.joinpath("tuned_CarDECweights.index").exists()
 
         set_centroids = not (self.load_fullmodel and self.weights_exist)
 
@@ -232,10 +233,10 @@ class CarDEC_API:
             denoise_all = False
 
         if not self.count_loaded:
-            weights_dir = os.path.join(self.weights_dir, 'count weights')
-            weight_files_exist = os.path.isfile(weights_dir + "/countmodel_weights_HVG Count.index")
+            weights_dir = self.weights_dir.joinpath('count weights')
+            weight_files_exist = weights_dir.joinpath("countmodel_weights_HVG Count.index").exists()
             if self.LVG:
-                weight_files_exist = weight_files_exist and os.path.isfile(weights_dir + "/countmodel_weights_LVG Count.index")
+                weight_files_exist = weight_files_exist and weights_dir.joinpath("countmodel_weights_LVG Count.index").exists()
 
             init_args = (act, random_seed, self.model.splitseed, optimizer, weights_dir)
             train_args = (num_epochs, batch_size_count, val_split, lr, decay_factor, patience_LR, patience_ES)

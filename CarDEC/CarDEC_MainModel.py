@@ -21,6 +21,7 @@ import numpy as np
 from math import ceil
 
 import os
+from pathlib import Path
 from copy import deepcopy
 from time import time
 
@@ -76,7 +77,7 @@ class CarDEC_Model(Model):
         self.actincenter = actincenter
         self.load_encoder_weights = load_encoder_weights
         self.clust_weight = clust_weight
-        self.weights_dir = weights_dir
+        self.weights_dir = Path(weights_dir)
         self.preclust_embedding = None
 
         # set random seed
@@ -90,11 +91,11 @@ class CarDEC_Model(Model):
                        random_seed = random_seed, splitseed = self.splitseed, init="glorot_uniform", optimizer = Adam(), 
                        weights_dir = weights_dir)
 
-        build_dir(self.weights_dir)
+        self.weights_dir.mkdir(parents=True, exist_ok=True)
 
         decoder_seed = round(100 * abs(np.random.normal()))
         if load_encoder_weights:
-            if os.path.isfile("./" + self.weights_dir + "/pretrained_autoencoder_weights.index"):
+            if self.weights_dir.joinpath("pretrained_autoencoder_weights.index").exists():
                 print("Pretrain weight index file detected, loading weights.")
                 self.sae.load_autoencoder()
                 print("Pretrained high variance autoencoder weights initialized.")
@@ -552,16 +553,14 @@ class CarDEC_Model(Model):
 
             if printperiter is not None:
                 if ite % printperiter == 0 and ite > 0:
-                    denoising_filename = os.path.join(CarDEC.weights_dir, '/intermediate_denoising/denoised' + ite)
-                    outfile = open(denoising_filename,'wb')
-                    pickle.dump(adata.layers["denoised"][:, adata.var['Variance Type'] == 'HVG'], outfile)
-                    outfile.close()
+                    denoising_filename = self.weights_dir.joinpath('intermediate_denoising/denoised' + ite)
+                    with open(denoising_filename,'wb') as outfile:
+                        pickle.dump(adata.layers["denoised"][:, adata.var['Variance Type'] == 'HVG'], outfile)
 
                     if self.LVG_dims is not None:
-                        denoising_filename = os.path.join(CarDEC.weights_dir, '/intermediate_denoising/denoisedLVG' + ite)
-                        outfile = open(denoising_filename,'wb')
-                        pickle.dump(adata.layers["denoised"][:, adata.var['Variance Type'] == 'LVG'], outfile)
-                        outfile.close()
+                        denoising_filename = self.weights_dir.joinpath('intermediate_denoising/denoisedLVG' + ite)
+                        with open(denoising_filename,'wb') as outfile:
+                            pickle.dump(adata.layers["denoised"][:, adata.var['Variance Type'] == 'LVG'], outfile)
 
             # check stop criterion
             delta_label = np.sum(y_pred != y_pred_last).astype(np.float32) / y_pred.shape[0]
@@ -609,7 +608,7 @@ class CarDEC_Model(Model):
         if denoise:
             self.make_outputs(adata, batch_size, denoise = True)
 
-        self.save_weights("./" + self.weights_dir + "/tuned_CarDECweights", save_format='tf')
+        self.save_weights(self.weights_dir.joinpath("tuned_CarDECweights").as_posix(), save_format='tf')
 
         print("\nTotal Runtime is " + str(time() - total_start))
 
@@ -636,9 +635,9 @@ class CarDEC_Model(Model):
         - adata: `anndata.AnnData`, (Optional) The annotated data matrix of shape (n_obs, n_vars). If an adata object was provided as input, the adata object will be returned with inference outputs added.
         """
 
-        if os.path.isfile("./" + self.weights_dir + "/tuned_CarDECweights.index"):
+        if self.weights_dir.joinpath("tuned_CarDECweights.index").exists():
             print("Weight index file detected, loading weights.")
-            self.load_weights("./" + self.weights_dir + "/tuned_CarDECweights").expect_partial()
+            self.load_weights(self.weights_dir.joinpath("tuned_CarDECweights").as_posix()).expect_partial()
             print("CarDEC Model weights loaded successfully.")
 
             if adata is not None:

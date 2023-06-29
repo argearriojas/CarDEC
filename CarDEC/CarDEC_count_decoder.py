@@ -13,7 +13,7 @@ import random
 import numpy as np
 from scipy.stats import zscore
 import os
-
+from pathlib import Path
 
 set_floatx('float32')
 
@@ -50,7 +50,7 @@ class count_model(Model):
         else:
             self.embed_name = 'LVG embedding'
         
-        self.weights_dir = weights_dir
+        self.weights_dir = Path(weights_dir)
         
         self.dims = dims
         n_stacks = len(dims) - 1
@@ -78,7 +78,7 @@ class count_model(Model):
 
         self.rescale = Lambda(lambda l: tf.matmul(tf.linalg.diag(l[0]), l[1]), name = 'sf scaling')
         
-        build_dir(self.weights_dir)
+        self.weights_dir.mkdir(parents=True, exist_ok=True)
         
         self.construct(n_features, self.name_)
         
@@ -108,7 +108,7 @@ class count_model(Model):
             
         tf.keras.backend.clear_session()
         
-        self.load_weights(os.path.join(self.weights_dir, "countmodel_weights_" + self.name_)).expect_partial()
+        self.load_weights(self.weights_dir.joinpath("countmodel_weights_" + self.name_).as_posix()).expect_partial()
         
     def construct(self, n_features, name, summarize = False):
         """ This class method fully initalizes the TensorFlow model.
@@ -276,10 +276,8 @@ class count_model(Model):
         
         total_time = round(time() - total_start, 2)
         
-        if not os.path.isdir("./" + self.weights_dir):
-            os.mkdir("./" + self.weights_dir)
-        
-        self.save_weights(os.path.join(self.weights_dir, "countmodel_weights_" + self.name_), save_format='tf')
+        self.weights_dir.mkdir(parents=True, exist_ok=True)
+        self.save_weights(self.weights_dir.joinpath("countmodel_weights_" + self.name_).as_posix(), save_format='tf')
                 
         print('\nTraining Completed')
         print("Total training time: " + str(total_time) + " seconds")
